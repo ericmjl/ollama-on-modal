@@ -4,7 +4,6 @@ import subprocess
 import time
 from fastapi import FastAPI, Request, HTTPException
 from typing import List, Dict, Any
-import ollama
 
 
 MODEL = os.environ.get("MODEL", "qwq")
@@ -97,7 +96,7 @@ class Ollama:
             if not messages:
                 raise HTTPException(
                     status_code=400,
-                    detail="Messages array is required and cannot be empty"
+                    detail="Messages array is required and cannot be empty",
                 )
 
             response = ollama.chat(model=model, messages=messages)
@@ -108,25 +107,26 @@ class Ollama:
                 "object": "chat.completion",
                 "created": int(time.time()),
                 "model": model,
-                "choices": [{
-                    "index": 0,
-                    "message": {
-                        "role": "assistant",
-                        "content": response["message"]["content"]
-                    },
-                    "finish_reason": "stop"
-                }],
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": response["message"]["content"],
+                        },
+                        "finish_reason": "stop",
+                    }
+                ],
                 "usage": {
                     "prompt_tokens": -1,  # Ollama doesn't provide token counts
                     "completion_tokens": -1,
-                    "total_tokens": -1
-                }
+                    "total_tokens": -1,
+                },
             }
 
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail=f"Error processing chat completion: {str(e)}"
+                status_code=500, detail=f"Error processing chat completion: {str(e)}"
             )
 
     @modal.asgi_app()
