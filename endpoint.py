@@ -3,7 +3,8 @@ import os
 import subprocess
 import time
 from fastapi import FastAPI, Request, HTTPException
-from typing import List, Dict, Any, Optional
+from fastapi.responses import StreamingResponse
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from pydantic import BaseModel, Field
 
 
@@ -76,17 +77,19 @@ class ChatCompletionRequest(BaseModel):
     messages: List[ChatMessage] = Field(
         ..., description="The messages to generate a completion for"
     )
+    stream: bool = Field(default=False, description="Whether to stream the response")
 
 
 @api.post("/v1/chat/completions")
-async def v1_chat_completions(request: ChatCompletionRequest) -> Dict[str, Any]:
+async def v1_chat_completions(request: ChatCompletionRequest) -> Any:
     """Handle chat completion requests in OpenAI-compatible format.
 
     :param request: Chat completion parameters
-    :return: Chat completion response in OpenAI-compatible format
+    :return: Chat completion response in OpenAI-compatible format, or StreamingResponse if streaming
     :raises HTTPException: If the request is invalid or processing fails
     """
     import ollama  # Import here to ensure it's available in the Modal container
+    import json
 
     try:
         if not request.messages:
@@ -95,8 +98,59 @@ async def v1_chat_completions(request: ChatCompletionRequest) -> Dict[str, Any]:
                 detail="Messages array is required and cannot be empty",
             )
 
+        if request.stream:
+
+            async def generate_stream() -> AsyncGenerator[str, None]:
+                response = ollama.chat(
+                    model=request.model,
+                    messages=[msg.dict() for msg in request.messages],
+                    stream=True,
+                )
+
+                for chunk in response:
+                    chunk_data = {
+                        "id": "chat-" + str(int(time.time())),
+                        "object": "chat.completion.chunk",
+                        "created": int(time.time()),
+                        "model": request.model,
+                        "choices": [
+                            {
+                                "index": 0,
+                                "delta": {
+                                    "role": "assistant",
+                                    "content": chunk["message"]["content"],
+                                },
+                                "finish_reason": None,
+                            }
+                        ],
+                    }
+                    yield f"data: {json.dumps(chunk_data)}\n\n"
+
+                # Send final chunk with finish_reason
+                final_chunk = {
+                    "id": "chat-" + str(int(time.time())),
+                    "object": "chat.completion.chunk",
+                    "created": int(time.time()),
+                    "model": request.model,
+                    "choices": [
+                        {
+                            "index": 0,
+                            "delta": {},
+                            "finish_reason": "stop",
+                        }
+                    ],
+                }
+                yield f"data: {json.dumps(final_chunk)}\n\n"
+                yield "data: [DONE]\n\n"
+
+            return StreamingResponse(
+                generate_stream(),
+                media_type="text/event-stream",
+            )
+
+        # Non-streaming response (existing code)
         response = ollama.chat(
-            model=request.model, messages=[msg.dict() for msg in request.messages]
+            model=request.model, messages=[msg.model_dump() for msg in request.messages]
         )
 
         return {
