@@ -2,9 +2,9 @@ import modal
 import os
 import subprocess
 import time
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
-from typing import List, Dict, Any, Optional, AsyncGenerator
+from typing import List, Any, Optional, AsyncGenerator
 from pydantic import BaseModel, Field
 
 
