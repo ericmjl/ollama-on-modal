@@ -8,7 +8,6 @@ User=ollama
 Group=ollama
 Restart=always
 RestartSec=3
-Environment="PATH=$PATH"
 
 [Install]
 WantedBy=default.target
