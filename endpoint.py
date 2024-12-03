@@ -2,6 +2,7 @@ import modal
 import os
 import subprocess
 import time
+from fastapi import FastAPI
 
 MODEL = os.environ.get("MODEL", "qwq")
 
@@ -55,13 +56,17 @@ image = (
     .run_function(pull)
 )
 app = modal.App(name="ollama", image=image)
+api = FastAPI()
 
 
 @app.cls(
     gpu=modal.gpu.A10G(count=1),
-    container_idle_timeout=300,
+    container_idle_timeout=10,
 )
 class Ollama:
+    def __init__(self):
+        self.serve()
+
     @modal.build()
     def build(self):
         subprocess.run(["systemctl", "daemon-reload"])
@@ -73,7 +78,8 @@ class Ollama:
         wait_for_ollama()
         subprocess.run(["ollama", "pull", MODEL])
 
-    @modal.web_endpoint(docs=True)
+    # @modal.web_endpoint(docs=True)
+    @api.post("/v1/chat/completions")
     def v1_chat_completions(self, message: str, model: str = MODEL):
         import ollama
 
@@ -81,3 +87,7 @@ class Ollama:
             model=model, messages=[{"role": "user", "content": message}]
         )
         return response
+
+    @modal.asgi_app()
+    def serve(self):
+        return api
