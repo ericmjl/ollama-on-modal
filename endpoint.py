@@ -2,7 +2,9 @@ import modal
 import os
 import subprocess
 import time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
+from typing import List, Dict, Any
+import ollama
 
 
 MODEL = os.environ.get("MODEL", "qwq")
@@ -80,15 +82,52 @@ class Ollama:
         subprocess.run(["ollama", "pull", MODEL])
 
     @api.post("/v1/chat/completions")
-    async def v1_chat_completions(request: Request):
-        import ollama
+    async def v1_chat_completions(self, request: Request) -> Dict[str, Any]:
+        """Handle chat completion requests in OpenAI-compatible format.
 
-        data = await request.json()
-        model = data.get("model", MODEL)
-        messages = data.get("messages", [])
+        :param request: FastAPI Request object containing chat completion parameters
+        :return: Chat completion response in OpenAI-compatible format
+        :raises HTTPException: If the request is invalid or processing fails
+        """
+        try:
+            data = await request.json()
+            model = data.get("model", MODEL)
+            messages = data.get("messages", [])
 
-        response = ollama.chat(model=model, messages=messages)
-        return response
+            if not messages:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Messages array is required and cannot be empty"
+                )
+
+            response = ollama.chat(model=model, messages=messages)
+
+            # Format response to match OpenAI API structure
+            return {
+                "id": "chat-" + str(int(time.time())),
+                "object": "chat.completion",
+                "created": int(time.time()),
+                "model": model,
+                "choices": [{
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": response["message"]["content"]
+                    },
+                    "finish_reason": "stop"
+                }],
+                "usage": {
+                    "prompt_tokens": -1,  # Ollama doesn't provide token counts
+                    "completion_tokens": -1,
+                    "total_tokens": -1
+                }
+            }
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error processing chat completion: {str(e)}"
+            )
 
     @modal.asgi_app()
     def serve(self):
