@@ -2,7 +2,8 @@ import modal
 import os
 import subprocess
 import time
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+
 
 MODEL = os.environ.get("MODEL", "qwq")
 
@@ -78,14 +79,15 @@ class Ollama:
         wait_for_ollama()
         subprocess.run(["ollama", "pull", MODEL])
 
-    # @modal.web_endpoint(docs=True)
     @api.post("/v1/chat/completions")
-    def v1_chat_completions(self, message: str, model: str = MODEL):
+    async def v1_chat_completions(request: Request):
         import ollama
 
-        response = ollama.chat(
-            model=model, messages=[{"role": "user", "content": message}]
-        )
+        data = await request.json()
+        model = data.get("model", MODEL)
+        messages = data.get("messages", [])
+
+        response = ollama.chat(model=model, messages=messages)
         return response
 
     @modal.asgi_app()
