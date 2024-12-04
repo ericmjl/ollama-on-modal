@@ -17,3 +17,8 @@ Or alternatively, just use pixi:
 ```bash
 pixi run deploy
 ```
+
+No further development is planned for this repository;
+it's just here as a reference for others who want to deploy Ollama on Modal!
+Meanwhile, I will be moving most of this code into the [llamabot](https://github.com/ericmjl/llamabot) repository
+and continue development there.
