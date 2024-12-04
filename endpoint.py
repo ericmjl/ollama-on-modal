@@ -1,3 +1,10 @@
+"""FastAPI endpoint for Ollama chat completions with OpenAI-compatible API.
+
+This module provides a FastAPI application that serves as a bridge between clients
+and Ollama models, offering an OpenAI-compatible API interface. It supports both
+streaming and non-streaming responses.
+"""
+
 import modal
 import os
 import subprocess
@@ -9,11 +16,14 @@ from pydantic import BaseModel, Field
 
 
 MODEL = os.environ.get("MODEL", "qwq")
-
 DEFAULT_MODELS = ["qwq"]
 
 
-def pull():
+def pull() -> None:
+    """Initialize and pull the Ollama model.
+
+    Sets up the Ollama service using systemctl and pulls the specified model.
+    """
     subprocess.run(["systemctl", "daemon-reload"])
     subprocess.run(["systemctl", "enable", "ollama"])
     subprocess.run(["systemctl", "start", "ollama"])
@@ -26,6 +36,7 @@ def wait_for_ollama(timeout: int = 30, interval: int = 2) -> None:
 
     :param timeout: Maximum time to wait in seconds
     :param interval: Time between checks in seconds
+    :raises TimeoutError: If the service doesn't start within the timeout period
     """
     import httpx
     from loguru import logger
@@ -46,6 +57,7 @@ def wait_for_ollama(timeout: int = 30, interval: int = 2) -> None:
             time.sleep(interval)
 
 
+# Configure Modal image with Ollama dependencies
 image = (
     modal.Image.debian_slim()
     .apt_install("curl", "systemctl")
@@ -64,6 +76,11 @@ api = FastAPI()
 
 
 class ChatMessage(BaseModel):
+    """A single message in a chat completion request.
+
+    Represents one message in the conversation history, following OpenAI's chat format.
+    """
+
     role: str = Field(
         ..., description="The role of the message sender (e.g. 'user', 'assistant')"
     )
@@ -71,6 +88,12 @@ class ChatMessage(BaseModel):
 
 
 class ChatCompletionRequest(BaseModel):
+    """Request model for chat completions.
+
+    Follows OpenAI's chat completion request format, supporting both streaming
+    and non-streaming responses.
+    """
+
     model: Optional[str] = Field(
         default=MODEL, description="The model to use for completion"
     )
@@ -101,6 +124,10 @@ async def v1_chat_completions(request: ChatCompletionRequest) -> Any:
         if request.stream:
 
             async def generate_stream() -> AsyncGenerator[str, None]:
+                """Generate streaming response chunks.
+
+                :return: AsyncGenerator yielding SSE-formatted JSON strings
+                """
                 response = ollama.chat(
                     model=request.model,
                     messages=[msg.dict() for msg in request.messages],
@@ -148,7 +175,7 @@ async def v1_chat_completions(request: ChatCompletionRequest) -> Any:
                 media_type="text/event-stream",
             )
 
-        # Non-streaming response (existing code)
+        # Non-streaming response
         response = ollama.chat(
             model=request.model, messages=[msg.model_dump() for msg in request.messages]
         )
@@ -186,20 +213,35 @@ async def v1_chat_completions(request: ChatCompletionRequest) -> Any:
     container_idle_timeout=10,
 )
 class Ollama:
+    """Modal container class for running Ollama service.
+
+    Handles initialization, startup, and serving of the Ollama model through FastAPI.
+    """
+
     def __init__(self):
+        """Initialize the Ollama service."""
         self.serve()
 
     @modal.build()
     def build(self):
+        """Build step for Modal container setup."""
         subprocess.run(["systemctl", "daemon-reload"])
         subprocess.run(["systemctl", "enable", "ollama"])
 
     @modal.enter()
     def enter(self):
+        """Entry point for Modal container.
+
+        Starts Ollama service and pulls the specified model.
+        """
         subprocess.run(["systemctl", "start", "ollama"])
         wait_for_ollama()
         subprocess.run(["ollama", "pull", MODEL])
 
     @modal.asgi_app()
     def serve(self):
+        """Serve the FastAPI application.
+
+        :return: FastAPI application instance
+        """
         return api
