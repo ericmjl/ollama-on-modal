@@ -15,8 +15,8 @@ from typing import List, Any, Optional, AsyncGenerator
 from pydantic import BaseModel, Field
 
 
-MODEL = os.environ.get("MODEL", "qwq")
-DEFAULT_MODELS = ["qwq"]
+MODEL = os.environ.get("MODEL", "gemma2:27b")
+DEFAULT_MODELS = ["gemma2:27b"]
 
 
 def pull() -> None:
