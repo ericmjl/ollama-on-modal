@@ -12,7 +12,17 @@ To deploy the app, run the following command (if you have `modal` installed alre
 modal deploy endpoint_v2.py
 ```
 
-No further development is planned for this repository;
-it's just here as a reference for others who want to deploy Ollama on Modal!
-Meanwhile, I will be moving most of this code into the [llamabot](https://github.com/ericmjl/llamabot) repository
-and continue development there.
+Once it's up, you can change your Ollama endpoint from `localhost:11434` to `https://<your-modal-app-prefix>.modal.run`.
+
+With LiteLLM (and LlamaBot, by extension), you can connect using a different `api_base`:
+
+```python
+import llamabot as lmb
+
+
+bot = lmb.SimpleBot(
+    "You are a helpful assistant.",
+    model_name="ollama_chat/llama3.1",
+    api_base="https://<your-modal-app-prefix>.modal.run",
+)
+```
