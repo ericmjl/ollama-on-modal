@@ -9,13 +9,7 @@ It supports streaming and non-streaming responses.
 To deploy the app, run the following command (if you have `modal` installed already):
 
 ```bash
-modal deploy endpoint.py
-```
-
-Or alternatively, just use pixi:
-
-```bash
-pixi run deploy
+modal deploy endpoint_v2.py
 ```
 
 No further development is planned for this repository;
