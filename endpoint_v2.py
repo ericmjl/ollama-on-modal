@@ -56,7 +56,6 @@ def wait_for_ollama(timeout: int = 30, interval: int = 2) -> None:
     gpu="A10G",
 )
 class OllamaService:
-
     @modal.enter()
     def enter(self):
         subprocess.Popen(["ollama", "serve"])
