@@ -15,7 +15,7 @@ modal deploy endpoint_v2.py
 To deploy a new model, run:
 
 ```bash
-modal run endpoint_v2.py::pull_model --model-name "model-name-on-ollama-goes-here"
+modal run endpoint_v2.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here"
 ```
 
 Once it's up, you can change your Ollama endpoint from `localhost:11434` to `https://<your-modal-app-prefix>.modal.run` in your relevant apps (e.g. OpenWebUI).
