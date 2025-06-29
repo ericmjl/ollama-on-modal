@@ -28,7 +28,11 @@ import llamabot as lmb
 
 bot = lmb.SimpleBot(
     "You are a helpful assistant.",
-    model_name="ollama_chat/llama3.1",
-    api_base="https://<your-modal-app-prefix>.modal.run",
+    model_name="ollama_chat/llama3.2",
+    api_base="https://<your-modal-app-prefix>.modal.run", # no trailing slash!
 )
+
+bot("Hello!")
 ```
+
+Remember, do NOT put a trailing `/` at the end, otherwise it's going to error out!
