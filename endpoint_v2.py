@@ -6,9 +6,7 @@ import time
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .apt_install("curl", "systemctl")
-    .run_commands(
-        "curl -fsSL https://ollama.com/install.sh | sh",
-    )
+    .run_commands("curl -fsSL https://ollama.com/install.sh | sh", force_build=True)
     .pip_install("httpx", "loguru")
     .env(
         {
@@ -52,8 +50,7 @@ def wait_for_ollama(timeout: int = 30, interval: int = 2) -> None:
 @app.cls(
     scaledown_window=10,
     volumes={"/usr/share/ollama/.ollama/models": volume},
-    memory=1024 * 1,
-    gpu="A10G",
+    gpu="H100",
 )
 class OllamaService:
     @modal.enter()
