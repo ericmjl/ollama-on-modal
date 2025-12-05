@@ -1,0 +1,58 @@
+# Deployment Guide
+
+This guide explains how to deploy the Ollama service on Modal.
+
+## Quick Start
+
+Deploy the service using:
+
+```bash
+pixi run deploy
+```
+
+Or directly with Modal:
+
+```bash
+modal deploy endpoint.py
+```
+
+## What Gets Deployed
+
+The deployment uses `endpoint.py`, which:
+
+- Sets up an Ollama service on Modal with H100 GPU
+- Mounts a persistent volume for model weights at `/usr/share/ollama/.ollama/models`
+- Exposes the Ollama API on port 11434
+- Automatically starts the Ollama service when the container initializes
+
+## Deployment Output
+
+After successful deployment, you'll receive:
+
+- **Web endpoint URL**: `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
+- **Modal dashboard link**: View your deployment at `https://modal.com/apps/ericmjl/main/deployed/ollama-service`
+
+## Configuration
+
+The service is configured with:
+
+- **GPU**: H100 (configurable in `endpoint.py`)
+- **Volume**: Persistent storage for model weights
+- **Port**: 11434 (Ollama's default API port)
+- **Environment**: Python 3.12 on Debian slim
+
+## Pulling Models
+
+To pull a model, you can use the `pull_model` method:
+
+```python
+import modal
+
+app = modal.App.lookup("ollama-service")
+service = app.OllamaService()
+
+# Pull a model
+service.pull_model.remote("llama3.1")
+```
+
+Or use the Ollama API directly via the web endpoint.

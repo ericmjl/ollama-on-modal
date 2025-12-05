@@ -1,7 +1,7 @@
-import modal
 import subprocess
 import time
 
+import modal
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -48,9 +48,10 @@ def wait_for_ollama(timeout: int = 30, interval: int = 2) -> None:
 
 
 @app.cls(
-    scaledown_window=10,
     volumes={"/usr/share/ollama/.ollama/models": volume},
     gpu="H100",
+    scaledown_window=10,  # Scale down after 10 seconds of inactivity
+    timeout=3600,  # 1 hour timeout for large model downloads
 )
 class OllamaService:
     @modal.enter()

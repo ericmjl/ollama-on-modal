@@ -6,17 +6,25 @@ Thank you @irfansharif for the great work!
 I have modified it to be an OpenAI-compatible endpoint that allows [llamabot](https://github.com/ericmjl/llamabot) to connect to the modal endpoint seamlessly.
 It supports streaming and non-streaming responses.
 
-To deploy the app, run the following command (if you have `modal` installed already):
+To deploy the app, run the following command:
 
 ```bash
-modal deploy endpoint_v2.py
+pixi run deploy
 ```
 
-To deploy a new model, run:
+Alternatively, you can deploy directly with Modal:
 
 ```bash
-modal run endpoint_v2.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here"
+modal deploy endpoint.py
 ```
+
+To pull a new model, run:
+
+```bash
+modal run endpoint.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here"
+```
+
+**Note:** Large models (like 70B) may take a while to download. The timeout has been set to 1 hour to accommodate large model downloads.
 
 Once it's up, you can change your Ollama endpoint from `localhost:11434` to `https://<your-modal-app-prefix>.modal.run` in your relevant apps (e.g. OpenWebUI).
 
