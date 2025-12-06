@@ -97,3 +97,5 @@ service.update_autoscaler(scaledown_window=300)
 - [Modal Scaling Documentation](https://modal.com/docs/guide/scale)
 - [Modal API Reference - @app.cls](https://modal.com/docs/reference/modal.App#modal.App.cls)
 
+
+

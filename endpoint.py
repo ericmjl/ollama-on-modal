@@ -6,7 +6,7 @@ import modal
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .apt_install("curl", "systemctl")
-    .run_commands("curl -fsSL https://ollama.com/install.sh | sh", force_build=True)
+    .run_commands("curl -fsSL https://ollama.com/install.sh | sh", force_build=False)
     .pip_install("httpx", "loguru")
     .env(
         {
@@ -62,6 +62,16 @@ class OllamaService:
     def pull_model(self, model_name: str):
         subprocess.run(["echo", "pulling model", model_name])
         subprocess.run(["ollama", "pull", model_name])
+
+    @modal.method()
+    def list(self):
+        """List all available models."""
+        wait_for_ollama()
+        result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
+        print(result.stdout)
+        if result.stderr:
+            print(result.stderr)
+        return result.stdout
 
     @modal.web_server(11434)
     def server(self):

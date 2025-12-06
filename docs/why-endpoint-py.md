@@ -62,3 +62,5 @@ Unlike `router.py` which adds a FastAPI proxy layer, `endpoint.py`:
 - The simpler, more direct approach
 - The correct choice for this project
 
+
+

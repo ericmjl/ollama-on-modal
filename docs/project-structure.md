@@ -70,3 +70,5 @@ Modal Cloud (deployed service)
 - **`pixi.toml`**: Dependency and task management
 - **`ollama.service`**: Systemd service configuration (used in image build)
 
+
+
