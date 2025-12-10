@@ -55,12 +55,6 @@ This file contains a simpler Ollama service implementation using `@modal.web_ser
 - Uses inline script metadata (PEP 723) for dependencies
 - Run with: `uv run scripts/test_gpu_routing.py`
 
-### `ollama.service`
-
-**Purpose**: Systemd service file for Ollama
-
-This file is not currently used in the deployment. Ollama is started directly via `subprocess.Popen` in `endpoint.py`.
-
 ## Git History Context
 
 From the git history:
@@ -83,4 +77,3 @@ Modal Cloud (deployed service)
 
 - **`endpoint.py`**: Main deployment file - defines the Modal app
 - **`pixi.toml`**: Dependency and task management
-- **`ollama.service`**: Systemd service configuration (used in image build)

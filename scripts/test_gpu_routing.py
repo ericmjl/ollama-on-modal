@@ -11,6 +11,12 @@
 This script tests that models are correctly routed to the appropriate GPU:
 - Large models (e.g., deepseek-r1:32b) should route to H100
 - Smaller models (e.g., llama3.2) should route to A10G
+
+To run this script, use:
+
+```bash
+uv run scripts/test_gpu_routing.py
+```
 """
 
 import os

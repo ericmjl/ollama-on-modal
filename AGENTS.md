@@ -197,7 +197,6 @@ mkdir -p docs
 
 - **`endpoint.py`**: Main deployment file (use this)
 - **`pixi.toml`**: Dependency and task management
-- **`ollama.service`**: Systemd service configuration
 - **`docs/`**: Documentation directory (kebab-case filenames)
 
 ### Deployment Flow
