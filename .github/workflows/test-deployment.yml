@@ -33,21 +33,11 @@ jobs:
       - name: Deploy to Modal (test environment)
         id: deploy
         run: |
-          # Deploy and capture output
-          DEPLOY_OUTPUT=$(pixi run modal deploy endpoint.py --name ollama-service-test 2>&1)
-          echo "$DEPLOY_OUTPUT"
+          # Deploy to test environment
+          pixi run modal deploy endpoint.py --name ollama-service-test
 
-          # Extract endpoint URL from output
-          # Modal outputs URLs in format: https://username--app-name-class-method.modal.run
-          ENDPOINT_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^ ]+\.modal\.run' | head -1 || echo "")
-
-          if [ -z "$ENDPOINT_URL" ]; then
-            # Fallback: try to construct from known pattern
-            # Get username from Modal config or use default
-            USERNAME=$(pixi run modal token current 2>&1 | grep -oP 'user: \K[^ ]+' || echo "ericmjl")
-            ENDPOINT_URL="https://${USERNAME}--ollama-service-test-ollamaservice-server.modal.run"
-          fi
-
+          # Hard-coded endpoint URL
+          ENDPOINT_URL="https://ericmjl--ollama-service-test-ollamaservice-server.modal.run"
           echo "Endpoint URL: $ENDPOINT_URL"
           echo "MODAL_ENDPOINT_URL=$ENDPOINT_URL" >> $GITHUB_ENV
           {
@@ -87,7 +77,7 @@ jobs:
     timeout-minutes: 15
 
     env:
-      MODAL_ENDPOINT_URL: ${{ needs.deploy.outputs.endpoint_url }}
+      MODAL_ENDPOINT_URL: "https://ericmjl--ollama-service-test-ollamaservice-server.modal.run"
       H100_TEST_MODEL: ${{ vars.H100_TEST_MODEL || 'deepseek-r1:32b' }}
       A10G_TEST_MODEL: ${{ vars.A10G_TEST_MODEL || 'llama3.2' }}
 
