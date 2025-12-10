@@ -5,6 +5,7 @@ This document contains essential commands, patterns, and knowledge learned durin
 ## Deployment Commands
 
 ### Deploy the Application
+
 ```bash
 # Using pixi (recommended)
 pixi run deploy
@@ -14,6 +15,7 @@ modal deploy endpoint.py
 ```
 
 ### Update Dependencies
+
 ```bash
 # Update a specific package
 pixi update modal
@@ -23,6 +25,7 @@ pixi install
 ```
 
 ### Check Installed Versions
+
 ```bash
 # Check Modal version
 pixi run python -c "import modal; print(modal.__version__)"
@@ -34,6 +37,7 @@ pixi run python --version
 ## Git History Investigation
 
 ### View File History
+
 ```bash
 # View commit history for a specific file
 git log --oneline --all -- <file>
@@ -46,6 +50,7 @@ git log --all --full-history --follow -- "*pattern*"
 ```
 
 ### Find When Files Were Added/Deleted
+
 ```bash
 # Find when a file was added
 git log --all --oneline --diff-filter=A -- <file>
@@ -55,6 +60,7 @@ git log --all --oneline --diff-filter=D -- "*pattern*"
 ```
 
 ### View File at Specific Commit
+
 ```bash
 # View file contents at a specific commit
 git show <commit-hash>:<file-path>
@@ -64,6 +70,7 @@ git show <commit-hash> --stat
 ```
 
 ### Search Git History
+
 ```bash
 # Search for commits affecting multiple files
 git log --all --oneline -- <file1> <file2>
@@ -75,6 +82,7 @@ git log --all --grep="deploy"
 ## Modal API Reference
 
 ### Check Modal API Documentation
+
 ```bash
 # View help for @app.cls decorator
 pixi run python -c "import modal; help(modal.App.cls)"
@@ -83,6 +91,7 @@ pixi run python -c "import modal; help(modal.App.cls)"
 ### Key Modal Parameters for @app.cls()
 
 **Scaling Parameters:**
+
 - `scaledown_window`: Seconds before idle containers are terminated (default: 60)
 - `container_idle_timeout`: Alternative parameter for idle timeout
 - `min_containers`: Minimum number of containers to keep running
@@ -91,6 +100,7 @@ pixi run python -c "import modal; help(modal.App.cls)"
 - `keep_warm`: Number of containers to keep warm (always running)
 
 **Resource Parameters:**
+
 - `gpu`: GPU configuration - use string format: `gpu="H100"` (not `modal.gpu.H100()`)
 - `cpu`: CPU allocation
 - `memory`: Memory allocation
@@ -98,6 +108,7 @@ pixi run python -c "import modal; help(modal.App.cls)"
 - `network_file_systems`: Network file system mounts
 
 **Other Parameters:**
+
 - `image`: Custom image configuration
 - `env`: Environment variables
 - `secrets`: Modal secrets
@@ -105,6 +116,7 @@ pixi run python -c "import modal; help(modal.App.cls)"
 - `startup_timeout`: Container startup timeout
 
 ### Example Configuration
+
 ```python
 @app.cls(
     volumes={"/usr/share/ollama/.ollama/models": volume},
@@ -120,9 +132,11 @@ class OllamaService:
 ## Common Issues and Solutions
 
 ### Modal Version Too Old
+
 **Error**: `The client version (0.67.18) is too old. Please update`
 
 **Solution**:
+
 ```bash
 # Update pixi.toml to allow newer versions
 # Change: modal = ">=0.67.18, <0.68"
@@ -133,16 +147,20 @@ pixi update modal
 ```
 
 ### Invalid Parameter Error
+
 **Error**: `TypeError: _App.cls() got an unexpected keyword argument 'scaledown_window'`
 
 **Solution**:
+
 - Check Modal version - `scaledown_window` requires Modal 1.2.4+
 - Update Modal: `pixi update modal`
 
 ### Deprecated GPU Format
+
 **Warning**: `gpu=H100(...) is deprecated. Use gpu="H100" instead`
 
 **Solution**: Use string format instead of object format
+
 ```python
 # Old (deprecated)
 gpu=modal.gpu.H100()
@@ -154,6 +172,7 @@ gpu="H100"
 ## File Management
 
 ### Create Documentation Structure
+
 ```bash
 # Create docs directory
 mkdir -p docs
@@ -166,6 +185,7 @@ mkdir -p docs
 ```
 
 ### Check for Linter Errors
+
 ```bash
 # If using a linter, check specific files
 # (This depends on your linter setup)
@@ -174,12 +194,14 @@ mkdir -p docs
 ## Project-Specific Knowledge
 
 ### File Structure
+
 - **`endpoint.py`**: Main deployment file (use this)
 - **`pixi.toml`**: Dependency and task management
 - **`ollama.service`**: Systemd service configuration
 - **`docs/`**: Documentation directory (kebab-case filenames)
 
 ### Deployment Flow
+
 ```
 pixi.toml (deploy task)
     ↓
@@ -189,6 +211,7 @@ Modal Cloud (deployed service)
 ```
 
 ### Key Configuration Values
+
 - **GPU**: H100
 - **Scale-down window**: 10 seconds (configurable)
 - **Port**: 11434 (Ollama default)
@@ -198,6 +221,7 @@ Modal Cloud (deployed service)
 ## Useful Modal Commands
 
 ### Pull a Model
+
 ```bash
 # Pull a model using modal run command
 modal run endpoint.py::OllamaService.pull_model --model-name gemma3n:latest
@@ -207,6 +231,7 @@ modal run endpoint.py::OllamaService.pull_model --model-name llama3.1
 ```
 
 ### Lookup and Interact with Deployed App
+
 ```python
 import modal
 
@@ -221,6 +246,7 @@ service.pull_model.remote("llama3.1")
 ```
 
 ### Update Autoscaler Dynamically
+
 ```python
 # Update scaling settings without redeploying
 service.update_autoscaler(scaledown_window=300)
@@ -235,6 +261,7 @@ service.update_autoscaler(scaledown_window=300)
 ## Quick Reference
 
 ### Most Common Commands
+
 ```bash
 # Deploy
 pixi run deploy
@@ -250,7 +277,7 @@ git log --oneline --all -- <file>
 ```
 
 ### Most Important Modal Parameters
+
 - `scaledown_window`: Control when containers scale down (cost optimization)
 - `gpu`: GPU type (use string format: `"H100"`)
 - `volumes`: Persistent storage for model weights
-
