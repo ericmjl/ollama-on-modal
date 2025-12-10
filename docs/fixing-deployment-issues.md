@@ -9,11 +9,13 @@ This document describes the issues encountered during deployment and how they we
 **Problem**: The `@app.cls()` decorator was using `scaledown_window=10`, but Modal version 0.67.18 didn't support this parameter (or had a bug).
 
 **Error**:
+
 ```
 TypeError: _App.cls() got an unexpected keyword argument 'scaledown_window'
 ```
 
 **Solution**:
+
 - Initially removed the parameter to get deployment working
 - After updating Modal to 1.2.4, `scaledown_window` is now supported
 - Re-added with a reasonable value (600 seconds = 10 minutes) for cost optimization
@@ -27,11 +29,13 @@ TypeError: _App.cls() got an unexpected keyword argument 'scaledown_window'
 **Problem**: The Modal client version (0.67.18) was too old and incompatible with the current Modal API.
 
 **Error**:
+
 ```
 The client version (0.67.18) is too old. Please update (pip install --upgrade modal).
 ```
 
 **Solution**:
+
 - Updated `pixi.toml` to allow newer Modal versions: changed from `modal = ">=0.67.18, <0.68"` to `modal = ">=0.67.18"`
 - Ran `pixi update modal` to update to version 1.2.4
 
@@ -40,6 +44,7 @@ The client version (0.67.18) is too old. Please update (pip install --upgrade mo
 **Problem**: Using `gpu=modal.gpu.H100()` format is deprecated in newer Modal versions.
 
 **Warning**:
+
 ```
 `gpu=H100(...)` is deprecated. Use `gpu="H100"` instead.
 ```
@@ -68,4 +73,3 @@ class OllamaService:
 ```
 
 This configuration is compatible with Modal 1.2.4+ and deploys successfully.
-

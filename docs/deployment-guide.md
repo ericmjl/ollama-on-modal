@@ -65,6 +65,7 @@ Modal supports multiple environments for deploying the same app:
 - **Test**: Separate environment for testing (`modal deploy endpoint.py --env test`)
 
 Both environments use the same app name (`ollama-service`) but are isolated:
+
 - Separate secrets and configuration
 - Separate volumes and resources
 - Different endpoint URLs
@@ -87,12 +88,16 @@ service = app.OllamaService()
 service.pull_model.remote("llama3.1")
 ```
 
-Or use the Ollama API directly via the web endpoint, or via CLI:
+Or use the Ollama API directly via the web endpoint, or via pixi tasks:
 
 ```bash
 # Pull model in production
-modal run endpoint.py::OllamaService.pull_model --model-name llama3.1
+pixi run pull-model llama3.1
+# Or: modal run endpoint.py::OllamaService.pull_model --model-name llama3.1
 
-# Pull model in test environment
-modal run endpoint.py::OllamaService.pull_model --model-name llama3.1 --env test
+# Pull test models (test environment)
+pixi run pull-test-models  # Pulls both H100 and A10G test models
+pixi run pull-test-model-h100  # Pulls deepseek-r1:32b
+pixi run pull-test-model-a10g  # Pulls llama3.2
+# Or: modal run --env test endpoint.py::OllamaService.pull_model --model-name llama3.1
 ```

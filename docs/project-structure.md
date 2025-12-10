@@ -69,8 +69,3 @@ Modal Cloud (deployed service)
 - **`endpoint.py`**: Main deployment file - defines the Modal app
 - **`pixi.toml`**: Dependency and task management
 - **`ollama.service`**: Systemd service configuration (used in image build)
-
-
-
-
-

@@ -11,6 +11,11 @@ deploy = "modal deploy endpoint.py"
 pull-model = "sh -c 'modal run endpoint.py::OllamaService.pull_model --model-name \"$1\"' --"
 list-models = "modal run endpoint.py::OllamaService.list"
 
+# Test environment model pulling
+pull-test-models = { depends-on = ["pull-test-model-h100", "pull-test-model-a10g"] }
+pull-test-model-h100 = "modal run --env test endpoint.py::OllamaService.pull_model --model-name deepseek-r1:32b"
+pull-test-model-a10g = "modal run --env test endpoint.py::OllamaService.pull_model --model-name llama3.2"
+
 [dependencies]
 python = ">=3.12.0,<3.13"
 fastapi = ">=0.115.5,<0.116"
