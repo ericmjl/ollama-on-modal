@@ -28,8 +28,7 @@ jobs:
 
       - name: Authenticate with Modal
         run: |
-          echo "$MODAL_TOKEN_ID" | pixi run modal token set --token-id-stdin
-          echo "$MODAL_TOKEN_SECRET" | pixi run modal token set --token-secret-stdin
+          pixi run modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET"
 
       - name: Deploy to Modal (test environment)
         id: deploy
