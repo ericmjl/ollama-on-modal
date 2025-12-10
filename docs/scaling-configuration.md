@@ -46,6 +46,7 @@ Consider these factors when setting `scaledown_window`:
 ### Example Configurations
 
 **Cost-optimized** (scale down quickly):
+
 ```python
 @app.cls(
     scaledown_window=60,  # 1 minute
@@ -54,6 +55,7 @@ Consider these factors when setting `scaledown_window`:
 ```
 
 **Performance-optimized** (keep containers warm longer):
+
 ```python
 @app.cls(
     scaledown_window=1800,  # 30 minutes
@@ -62,6 +64,7 @@ Consider these factors when setting `scaledown_window`:
 ```
 
 **Current setting** (cost-optimized for testing):
+
 ```python
 @app.cls(
     scaledown_window=10,  # 10 seconds (very aggressive for cost savings)
@@ -96,8 +99,3 @@ service.update_autoscaler(scaledown_window=300)
 
 - [Modal Scaling Documentation](https://modal.com/docs/guide/scale)
 - [Modal API Reference - @app.cls](https://modal.com/docs/reference/modal.App#modal.App.cls)
-
-
-
-
-
