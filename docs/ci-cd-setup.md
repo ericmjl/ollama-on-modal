@@ -81,13 +81,15 @@ Manually pull models to the test volume before running tests:
 
 ```bash
 # Deploy test environment first
-modal deploy endpoint.py --env test
+pixi run deploy --env test
+# Or: modal deploy endpoint.py --env test
 
-# Pull test models (use --env test to target test environment)
-modal run endpoint.py::OllamaService.pull_model \
-  --model-name deepseek-r1:32b --env test
-modal run endpoint.py::OllamaService.pull_model \
-  --model-name llama3.2 --env test
+# Pull all test models at once
+pixi run pull-test-models
+
+# Or pull individual models
+pixi run pull-test-model-h100  # Pulls deepseek-r1:32b
+pixi run pull-test-model-a10g  # Pulls llama3.2
 ```
 
 ### Option 2: Pull During Test Setup
