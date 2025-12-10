@@ -3,7 +3,7 @@ authors = ["Eric Ma <ericmajinglong@gmail.com>"]
 channels = ["conda-forge"]
 description = "Add a short description here"
 name = "ollama-modal"
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
 
 [tasks]

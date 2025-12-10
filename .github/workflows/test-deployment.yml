@@ -1,0 +1,126 @@
+name: Test Deployment and GPU Routing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy:
+    name: Deploy to Modal Test Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+
+      - name: Install dependencies
+        run: pixi install
+
+      - name: Authenticate with Modal
+        run: |
+          echo "$MODAL_TOKEN_ID" | pixi run modal token set --token-id-stdin
+          echo "$MODAL_TOKEN_SECRET" | pixi run modal token set --token-secret-stdin
+
+      - name: Deploy to Modal (test environment)
+        id: deploy
+        run: |
+          # Deploy and capture output
+          DEPLOY_OUTPUT=$(pixi run modal deploy endpoint.py --name ollama-service-test 2>&1)
+          echo "$DEPLOY_OUTPUT"
+
+          # Extract endpoint URL from output
+          # Modal outputs URLs in format: https://username--app-name-class-method.modal.run
+          ENDPOINT_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^ ]+\.modal\.run' | head -1 || echo "")
+
+          if [ -z "$ENDPOINT_URL" ]; then
+            # Fallback: try to construct from known pattern
+            # Get username from Modal config or use default
+            USERNAME=$(pixi run modal token current 2>&1 | grep -oP 'user: \K[^ ]+' || echo "ericmjl")
+            ENDPOINT_URL="https://${USERNAME}--ollama-service-test-ollamaservice-server.modal.run"
+          fi
+
+          echo "Endpoint URL: $ENDPOINT_URL"
+          echo "MODAL_ENDPOINT_URL=$ENDPOINT_URL" >> $GITHUB_ENV
+          echo "endpoint_url=$ENDPOINT_URL" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment to be ready
+        run: |
+          if [ -z "$MODAL_ENDPOINT_URL" ]; then
+            echo "Error: Could not determine endpoint URL"
+            exit 1
+          fi
+
+          echo "Waiting for endpoint to be ready: $MODAL_ENDPOINT_URL"
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            if curl -f -s "$MODAL_ENDPOINT_URL/api/version" > /dev/null 2>&1; then
+              echo "Endpoint is ready!"
+              exit 0
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Waiting for endpoint..."
+            sleep 10
+          done
+
+          echo "Error: Endpoint did not become ready within timeout"
+          exit 1
+
+  test:
+    name: Test GPU Routing with LlamaBot
+    runs-on: ubuntu-latest
+    needs: deploy
+    timeout-minutes: 15
+
+    env:
+      MODAL_ENDPOINT_URL: ${{ needs.deploy.outputs.endpoint_url }}
+      H100_TEST_MODEL: ${{ vars.H100_TEST_MODEL || 'deepseek-r1:32b' }}
+      A10G_TEST_MODEL: ${{ vars.A10G_TEST_MODEL || 'llama3.2' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          uv pip install llamabot httpx
+
+      - name: Run GPU routing tests
+        run: |
+          if [ -z "$MODAL_ENDPOINT_URL" ]; then
+            echo "Error: MODAL_ENDPOINT_URL not set"
+            exit 1
+          fi
+
+          uv run python scripts/test_gpu_routing.py
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            tests/*.log
+            tests/*.txt
+
