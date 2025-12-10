@@ -50,7 +50,11 @@ jobs:
 
           echo "Endpoint URL: $ENDPOINT_URL"
           echo "MODAL_ENDPOINT_URL=$ENDPOINT_URL" >> $GITHUB_ENV
-          echo "endpoint_url=$ENDPOINT_URL" >> $GITHUB_OUTPUT
+          {
+            echo "endpoint_url<<EOF"
+            echo "$ENDPOINT_URL"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Wait for deployment to be ready
         run: |
