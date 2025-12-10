@@ -1,3 +1,11 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "llamabot",
+#     "httpx",
+# ]
+# ///
+
 """Test GPU routing functionality using llamabot SimpleBot.
 
 This script tests that models are correctly routed to the appropriate GPU:
@@ -8,7 +16,6 @@ This script tests that models are correctly routed to the appropriate GPU:
 import os
 import sys
 import time
-from typing import Optional
 
 import llamabot as lmb
 
@@ -51,6 +58,7 @@ def test_h100_model(endpoint_url: str, model_name: str, timeout: int = 300) -> b
         print(f"✗ H100 model test failed: {model_name}")
         print(f"  Error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -93,6 +101,7 @@ def test_a10g_model(endpoint_url: str, model_name: str, timeout: int = 120) -> b
         print(f"✗ A10G model test failed: {model_name}")
         print(f"  Error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -153,4 +162,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
