@@ -101,10 +101,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          uv pip install llamabot httpx
-
       - name: Run GPU routing tests
         run: |
           if [ -z "$MODAL_ENDPOINT_URL" ]; then
@@ -112,7 +108,7 @@ jobs:
             exit 1
           fi
 
-          uv run python scripts/test_gpu_routing.py
+          uv run scripts/test_gpu_routing.py
 
       - name: Upload test results
         if: failure()
