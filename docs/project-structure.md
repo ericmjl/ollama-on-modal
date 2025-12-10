@@ -38,13 +38,28 @@ This file contains a simpler Ollama service implementation using `@modal.web_ser
 
 - Defines Python dependencies (FastAPI, loguru)
 - Defines Modal version (>=0.67.18)
-- Contains the `deploy` task: `modal deploy endpoint.py`
+- Contains tasks:
+  - `deploy`: Deploy to production (`modal deploy endpoint.py`)
+  - `pull-model`: Pull a model in production
+  - `list-models`: List available models
+  - `pull-test-models`: Pull all test models (H100 + A10G)
+  - `pull-test-model-h100`: Pull deepseek-r1:32b to test environment
+  - `pull-test-model-a10g`: Pull llama3.2 to test environment
+
+### `scripts/test_gpu_routing.py`
+
+**Purpose**: Test script for GPU routing functionality
+
+- Uses llamabot SimpleBot to test model routing
+- Tests H100 and A10G model routing
+- Uses inline script metadata (PEP 723) for dependencies
+- Run with: `uv run scripts/test_gpu_routing.py`
 
 ### `ollama.service`
 
 **Purpose**: Systemd service file for Ollama
 
-This file is copied into the Modal container image to configure Ollama as a systemd service. It's used during image build time.
+This file is not currently used in the deployment. Ollama is started directly via `subprocess.Popen` in `endpoint.py`.
 
 ## Git History Context
 
@@ -56,7 +71,7 @@ From the git history:
 
 ## Deployment Flow
 
-```
+```text
 pixi.toml (deploy task)
     ↓
 endpoint.py (Modal app definition)

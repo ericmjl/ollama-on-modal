@@ -81,8 +81,8 @@ Manually pull models to the test volume before running tests:
 
 ```bash
 # Deploy test environment first
-pixi run deploy --env test
-# Or: modal deploy endpoint.py --env test
+modal deploy endpoint.py --env test
+# Note: pixi run deploy doesn't support --env, use modal deploy directly
 
 # Pull all test models at once
 pixi run pull-test-models

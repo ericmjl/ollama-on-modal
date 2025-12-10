@@ -26,10 +26,14 @@ To pull a new model, run:
 
 ```bash
 # Pull model in production
-modal run endpoint.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here"
+pixi run pull-model "model-name-on-ollama-goes-here"
+# Or: modal run endpoint.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here"
 
-# Pull model in test environment
-modal run endpoint.py::OllamaService.pull_model --model-name "model-name-on-ollama-goes-here" --env test
+# Pull test models (test environment)
+pixi run pull-test-models  # Pulls both H100 and A10G test models
+pixi run pull-test-model-h100  # Pulls deepseek-r1:32b
+pixi run pull-test-model-a10g  # Pulls llama3.2
+# Or: modal run --env test endpoint.py::OllamaService.pull_model --model-name "model-name"
 ```
 
 **Note:** Large models (like 70B) may take a while to download. The timeout has been set to 1 hour to accommodate large model downloads.

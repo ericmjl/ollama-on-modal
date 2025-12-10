@@ -14,11 +14,11 @@ In `endpoint.py`, we've configured:
 @app.cls(
     volumes={"/usr/share/ollama/.ollama/models": volume},
     gpu="H100",
-    scaledown_window=600,  # Scale down after 10 minutes of inactivity
+    scaledown_window=10,  # Scale down after 10 seconds of inactivity
 )
 ```
 
-This means containers will automatically terminate after **10 minutes (600 seconds)** of inactivity.
+This means containers will automatically terminate after **10 seconds** of inactivity.
 
 ### Parameter Options
 
@@ -61,10 +61,10 @@ Consider these factors when setting `scaledown_window`:
 )
 ```
 
-**Balanced** (current setting):
+**Current setting** (cost-optimized for testing):
 ```python
 @app.cls(
-    scaledown_window=600,  # 10 minutes
+    scaledown_window=10,  # 10 seconds (very aggressive for cost savings)
     # ... other parameters
 )
 ```
