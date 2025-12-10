@@ -35,10 +35,10 @@ The deployment uses `endpoint.py`, which:
 
 After successful deployment, you'll receive:
 
-- **Web endpoint URL**: 
+- **Web endpoint URL**:
   - Production (main): `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
   - Test: `https://ericmjl-test--ollama-service-ollamaservice-server.modal.run`
-- **Modal dashboard link**: 
+- **Modal dashboard link**:
   - Production: `https://modal.com/apps/ericmjl/main/deployed/ollama-service`
   - Test: `https://modal.com/apps/ericmjl/test/deployed/ollama-service`
 
