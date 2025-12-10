@@ -54,16 +54,22 @@ You can configure test models via GitHub repository variables:
 
 ## Test Environment
 
-The CI/CD pipeline deploys to a separate test environment:
+The CI/CD pipeline deploys to a separate Modal environment:
 
-- **Test App Name**: `ollama-service-test`
-- **Production App Name**: `ollama-service` (unchanged)
+- **Modal Environment**: `test` (separate from `main`/production)
+- **App Name**: `ollama-service` (consistent across all environments)
+- **Deployment Command**: `modal deploy endpoint.py --env test`
+- **Endpoint URL Format**:
+  `https://{username}-{env-suffix}--{app-name}-{class-name}-{method-name}.modal.run`
+  - Test: `https://ericmjl-test--ollama-service-ollamaservice-server.modal.run`
+  - Production: `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
 
 This separation allows:
 
 - Independent scaling and configuration
 - Testing without affecting production
 - Cost management (test environment can scale down quickly)
+- Separate secrets and resources per environment
 
 ## Model Availability
 
@@ -75,13 +81,13 @@ Manually pull models to the test volume before running tests:
 
 ```bash
 # Deploy test environment first
-modal deploy endpoint.py --name ollama-service-test
+modal deploy endpoint.py --env test
 
-# Pull test models
+# Pull test models (use --env test to target test environment)
 modal run endpoint.py::OllamaService.pull_model \
-  --model-name deepseek-r1:32b --app-name ollama-service-test
+  --model-name deepseek-r1:32b --env test
 modal run endpoint.py::OllamaService.pull_model \
-  --model-name llama3.2 --app-name ollama-service-test
+  --model-name llama3.2 --env test
 ```
 
 ### Option 2: Pull During Test Setup
@@ -104,20 +110,25 @@ The workflow triggers on:
 
 ### 1. Deploy Job
 
-- Sets up Python environment
+- Sets up pixi environment
 - Installs dependencies via pixi
-- Authenticates with Modal
-- Deploys to test environment
-- Extracts endpoint URL
+- Authenticates with Modal using secrets
+- Deploys to test environment using `--env test`
+- Sets hard-coded endpoint URL (TODO: extract dynamically)
 - Waits for endpoint to be ready
 
 ### 2. Test Job
 
 - Sets up Python environment
-- Installs llamabot using uv
+- Installs uv
 - Runs `scripts/test_gpu_routing.py` using `uv run`
+  - Script uses inline metadata (PEP 723) for dependencies
+  - Automatically installs `llamabot` and `httpx`
 - Tests H100 model routing
 - Tests A10G model routing
+
+**Note**: Currently, all models run on H100 GPU. GPU routing based on model
+name has not been implemented yet (see [issue #1](https://github.com/ericmjl/ollama-on-modal/issues/1)).
 
 ## Troubleshooting
 
@@ -129,9 +140,12 @@ The workflow triggers on:
 
 ### Endpoint URL Not Found
 
-- The workflow tries multiple methods to extract the endpoint URL
-- Check workflow logs to see which method succeeded
-- If all methods fail, verify the app name matches `ollama-service-test`
+- The endpoint URL is currently hard-coded in the workflow
+- Test environment URL:
+  `https://ericmjl-test--ollama-service-ollamaservice-server.modal.run`
+- Production URL:
+  `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
+- TODO: Extract dynamically from deployment output (see workflow comments)
 
 ### Tests Fail
 
@@ -151,17 +165,39 @@ The workflow triggers on:
 You can run the test script manually:
 
 ```bash
-export MODAL_ENDPOINT_URL="https://your-username--ollama-service-test-ollamaservice-server.modal.run"
+# For test environment
+export MODAL_ENDPOINT_URL="https://ericmjl-test--ollama-service-ollamaservice-server.modal.run"
 export H100_TEST_MODEL="deepseek-r1:32b"
 export A10G_TEST_MODEL="llama3.2"
 
-uv run python scripts/test_gpu_routing.py
+uv run scripts/test_gpu_routing.py
 ```
+
+**Note**: Replace `ericmjl` with your Modal username in the endpoint URL.
+
+## Current Implementation Status
+
+### ✅ Completed
+
+- CI/CD workflow setup with GitHub Actions
+- Test environment deployment using `--env test`
+- Test script with inline dependency metadata (PEP 723)
+- Hard-coded endpoint URL for test environment
+- Authentication with Modal using GitHub secrets
+
+### 🚧 TODO / Future Improvements
+
+- **Dynamic Endpoint URL Extraction**: Currently hard-coded, should extract
+  from deployment output
+- **GPU Routing**: Not yet implemented - all models run on H100
+  (see [issue #1](https://github.com/ericmjl/ollama-on-modal/issues/1))
+- **Model Pre-pulling**: Test models should be pre-pulled to test volume
 
 ## Next Steps
 
-1. Add GitHub secrets (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`)
+1. ✅ GitHub secrets configured (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`)
 2. (Optional) Configure test model variables
 3. Ensure test models are available in test environment
 4. Push or create a PR to trigger the workflow
 5. Monitor workflow execution in GitHub Actions
+6. Implement GPU routing feature (see [issue #1](https://github.com/ericmjl/ollama-on-modal/issues/1))

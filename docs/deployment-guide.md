@@ -4,7 +4,7 @@ This guide explains how to deploy the Ollama service on Modal.
 
 ## Quick Start
 
-Deploy the service using:
+Deploy the service to production (main environment):
 
 ```bash
 pixi run deploy
@@ -14,6 +14,12 @@ Or directly with Modal:
 
 ```bash
 modal deploy endpoint.py
+```
+
+Deploy to test environment:
+
+```bash
+modal deploy endpoint.py --env test
 ```
 
 ## What Gets Deployed
@@ -29,8 +35,18 @@ The deployment uses `endpoint.py`, which:
 
 After successful deployment, you'll receive:
 
-- **Web endpoint URL**: `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
-- **Modal dashboard link**: View your deployment at `https://modal.com/apps/ericmjl/main/deployed/ollama-service`
+- **Web endpoint URL**: 
+  - Production (main): `https://ericmjl--ollama-service-ollamaservice-server.modal.run`
+  - Test: `https://ericmjl-test--ollama-service-ollamaservice-server.modal.run`
+- **Modal dashboard link**: 
+  - Production: `https://modal.com/apps/ericmjl/main/deployed/ollama-service`
+  - Test: `https://modal.com/apps/ericmjl/test/deployed/ollama-service`
+
+**Note**: The endpoint URL format is:
+`https://{username}-{env-suffix}--{app-name}-{class-name}-{method-name}.modal.run`
+
+Where `{env-suffix}` is empty for main environment, or the environment name
+(e.g., "test") for other environments.
 
 ## Configuration
 
@@ -41,6 +57,18 @@ The service is configured with:
 - **Port**: 11434 (Ollama's default API port)
 - **Environment**: Python 3.12 on Debian slim
 
+## Environments
+
+Modal supports multiple environments for deploying the same app:
+
+- **Main/Production**: Default environment (`modal deploy endpoint.py`)
+- **Test**: Separate environment for testing (`modal deploy endpoint.py --env test`)
+
+Both environments use the same app name (`ollama-service`) but are isolated:
+- Separate secrets and configuration
+- Separate volumes and resources
+- Different endpoint URLs
+
 ## Pulling Models
 
 To pull a model, you can use the `pull_model` method:
@@ -48,11 +76,23 @@ To pull a model, you can use the `pull_model` method:
 ```python
 import modal
 
+# For production (main environment)
 app = modal.App.lookup("ollama-service")
 service = app.OllamaService()
+service.pull_model.remote("llama3.1")
 
-# Pull a model
+# For test environment
+app = modal.App.lookup("ollama-service", environment="test")
+service = app.OllamaService()
 service.pull_model.remote("llama3.1")
 ```
 
-Or use the Ollama API directly via the web endpoint.
+Or use the Ollama API directly via the web endpoint, or via CLI:
+
+```bash
+# Pull model in production
+modal run endpoint.py::OllamaService.pull_model --model-name llama3.1
+
+# Pull model in test environment
+modal run endpoint.py::OllamaService.pull_model --model-name llama3.1 --env test
+```
