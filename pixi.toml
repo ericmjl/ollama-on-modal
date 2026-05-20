@@ -8,13 +8,19 @@ version = "0.1.0"
 
 [tasks]
 deploy = "modal deploy endpoint.py"
-pull-model = "sh -c 'modal run endpoint.py::OllamaService.pull_model --model-name \"$1\"' --"
-list-models = "modal run endpoint.py::OllamaService.list"
+pull-model = "sh -c 'modal run endpoint.py::OllamaServiceH100.pull_model --model-name \"$1\"' --"
+list-models = "modal run endpoint.py::OllamaServiceH100.list"
+
+# Image generation models
+pull-image-models = { depends-on = ["pull-flux2-klein", "pull-z-image-turbo", "pull-z-image-turbo-bf16"] }
+pull-flux2-klein = "modal run --env test endpoint.py::OllamaServiceA10.pull_model --model-name x/flux2-klein"
+pull-z-image-turbo = "modal run --env test endpoint.py::OllamaServiceA10.pull_model --model-name x/z-image-turbo"
+pull-z-image-turbo-bf16 = "modal run --env test endpoint.py::OllamaServiceL40S.pull_model --model-name x/z-image-turbo:bf16"
 
 # Test environment model pulling
-pull-test-models = { depends-on = ["pull-test-model-h100", "pull-test-model-a10g"] }
-pull-test-model-h100 = "modal run --env test endpoint.py::OllamaService.pull_model --model-name deepseek-r1:32b"
-pull-test-model-a10g = "modal run --env test endpoint.py::OllamaService.pull_model --model-name llama3.2"
+pull-test-models = { depends-on = ["pull-test-model-h100", "pull-test-model-a10"] }
+pull-test-model-h100 = "modal run --env test endpoint.py::OllamaServiceH100.pull_model --model-name deepseek-r1:32b"
+pull-test-model-a10 = "modal run --env test endpoint.py::OllamaServiceA10.pull_model --model-name llama3.2"
 
 [dependencies]
 python = ">=3.12.0,<3.13"

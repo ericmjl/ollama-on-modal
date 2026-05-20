@@ -42,7 +42,7 @@ jobs:
           # Hard-coded endpoint URL for test environment
           # Format: https://{username}-{env-suffix}--{app-name}-{class-name}-{method-name}.modal.run
           # TODO: Extract dynamically from deployment output instead of hard-coding
-          ENDPOINT_URL="https://ericmjl-test--ollama-service-ollamaservice-server.modal.run"
+          ENDPOINT_URL="https://ericmjl-test--ollama-service-ollamapassthrough-server.modal.run"
           echo "Endpoint URL: $ENDPOINT_URL"
           echo "MODAL_ENDPOINT_URL=$ENDPOINT_URL" >> $GITHUB_ENV
           {
@@ -85,7 +85,7 @@ jobs:
       # Hard-coded endpoint URL for test environment
       # Format: https://{username}-{env-suffix}--{app-name}-{class-name}-{method-name}.modal.run
       # TODO: Extract dynamically from deploy job output instead of hard-coding
-      MODAL_ENDPOINT_URL: "https://ericmjl-test--ollama-service-ollamaservice-server.modal.run"
+      MODAL_ENDPOINT_URL: "https://ericmjl-test--ollama-service-ollamapassthrough-server.modal.run"
       H100_TEST_MODEL: ${{ vars.H100_TEST_MODEL || 'deepseek-r1:32b' }}
       A10G_TEST_MODEL: ${{ vars.A10G_TEST_MODEL || 'llama3.2' }}
 
