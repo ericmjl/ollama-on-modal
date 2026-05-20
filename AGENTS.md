@@ -2,6 +2,29 @@
 
 This document contains essential commands, patterns, and knowledge learned during development and troubleshooting of this project.
 
+## ⚠️ CRITICAL: Always Search Documentation First
+
+**Before writing any code or calling any CLI commands, you MUST:**
+
+1. **Search the web for the latest API documentation** - APIs change frequently, and documentation in this file may be outdated
+2. **Search the web for CLI command syntax and options** - CLI tools are updated regularly with new flags and parameters
+3. **Verify current best practices** - What worked before may not be the recommended approach now
+
+**When to search:**
+
+- Before using any Modal API methods or decorators
+- Before running any `modal`, `pixi`, or other CLI commands
+- When encountering errors or unexpected behavior
+- When implementing new features that use external APIs or tools
+
+**Search strategy:**
+
+- Use specific queries like "Modal API @app.cls parameters 2024" or "pixi CLI deploy command"
+- Check official documentation sites first (modal.com/docs, pixi.sh, etc.)
+- Look for recent examples and changelogs
+
+**This file contains historical knowledge and patterns, but always verify against current documentation before proceeding.**
+
 ## Deployment Commands
 
 ### Deploy the Application
@@ -201,7 +224,7 @@ mkdir -p docs
 
 ### Deployment Flow
 
-```
+```text
 pixi.toml (deploy task)
     ↓
 endpoint.py (Modal app definition)
