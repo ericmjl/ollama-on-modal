@@ -8,7 +8,7 @@ import httpx
 from loguru import logger
 from llamabot import SimpleBot
 
-OLLAMA_BASE_URL = "https://ericmjl--ollama-service-ollamapassthrough-server.modal.run"
+OLLAMA_BASE_URL = "https://ericmjl--ollama-service-ollamaservice-server.modal.run"
 
 
 def test_text_model():
