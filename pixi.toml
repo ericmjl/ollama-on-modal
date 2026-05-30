@@ -9,7 +9,7 @@ version = "0.1.0"
 [tasks]
 deploy = "modal deploy endpoint.py"
 pull-model = "sh -c 'modal run endpoint.py::OllamaService.pull_model --model-name \"$1\"' --"
-pull-qwen35-35b = "modal run endpoint.py::OllamaService.pull_model --model-name qwen3.5:35b"
+pull-qwen36-35b = "modal run endpoint.py::OllamaService.pull_model --model-name qwen3.6:35b"
 list-models = "modal run endpoint.py::OllamaService.list"
 
 [dependencies]

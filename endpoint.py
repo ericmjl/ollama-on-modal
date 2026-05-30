@@ -3,7 +3,7 @@ import time
 
 import modal
 
-DEFAULT_MODEL = "qwen3.5:35b"
+DEFAULT_MODEL = "qwen3.6:35b"
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -53,7 +53,7 @@ def wait_for_ollama(timeout: int = 120, interval: int = 2) -> None:
 
 @app.cls(
     volumes={"/usr/share/ollama/.ollama/models": volume},
-    gpu="H100",
+    gpu=["L40S", "A100-40GB"],
     scaledown_window=120,
     timeout=3600,
 )
