@@ -1,6 +1,6 @@
-[project]
+[workspace]
 authors = ["Eric Ma <ericmajinglong@gmail.com>"]
-channels = ["conda-forge"]
+channels = ["https://prefix.dev/conda-forge"]
 description = "Add a short description here"
 name = "ollama-modal"
 platforms = ["osx-arm64", "linux-64"]
