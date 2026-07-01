@@ -3,7 +3,7 @@ import time
 
 import modal
 
-DEFAULT_MODEL = "qwen3.6:35b"
+DEFAULT_MODEL = "qwen3.6:27b"
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -54,14 +54,14 @@ def wait_for_ollama(timeout: int = 120, interval: int = 2) -> None:
 
 
 def warmup_model(model_name: str = DEFAULT_MODEL, timeout: float = 600.0) -> None:
-    """Load model weights into GPU VRAM before taking a memory snapshot."""
+    """Load model weights into GPU VRAM so the first real request is fast."""
     import httpx
     from loguru import logger
 
-    logger.info(f"Warming up {model_name} for GPU snapshot...")
+    logger.info(f"Warming up {model_name}...")
     response = httpx.post(
         "http://localhost:11434/api/generate",
-        json={"model": model_name, "prompt": "warmup", "stream": False},
+        json={"model": model_name, "prompt": "warmup", "stream": False, "think": False},
         timeout=timeout,
     )
     response.raise_for_status()
@@ -70,24 +70,27 @@ def warmup_model(model_name: str = DEFAULT_MODEL, timeout: float = 600.0) -> Non
 
 @app.cls(
     volumes={"/usr/share/ollama/.ollama/models": volume},
-    gpu=["L40S", "A100-40GB"],
+    gpu="L40S",
     scaledown_window=120,
     timeout=3600,
-    enable_memory_snapshot=True,
-    experimental_options={"enable_gpu_snapshot": True},
 )
 class OllamaService:
-    @modal.enter(snap=True)
-    def prepare_gpu_snapshot(self):
-        """Start Ollama and load the model into GPU memory before snapshotting."""
+    @modal.enter()
+    def start_and_load(self):
+        """Start Ollama, ensure the model is fully present (blobs included), and load it into VRAM."""
+        from loguru import logger
+
         subprocess.Popen(["ollama", "serve"])
         wait_for_ollama(timeout=180)
+        # `ollama show` validates the model is loadable (manifest + blobs intact),
+        # unlike `ollama list` which only reads the manifest. Re-pull cleanly if broken.
+        show = subprocess.run(["ollama", "show", DEFAULT_MODEL], capture_output=True)
+        if show.returncode != 0:
+            logger.warning(f"Model {DEFAULT_MODEL} missing or corrupt, (re)pulling...")
+            subprocess.run(["ollama", "rm", DEFAULT_MODEL], capture_output=True)
+            subprocess.run(["ollama", "pull", DEFAULT_MODEL], check=True)
+            volume.commit()
         warmup_model()
-
-    @modal.enter()
-    def verify_after_restore(self):
-        """Runs after snapshot restore; confirm Ollama is responding."""
-        wait_for_ollama(timeout=60)
 
     @modal.method()
     def pull_model(self, model_name: str = DEFAULT_MODEL):
