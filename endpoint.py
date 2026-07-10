@@ -3,7 +3,7 @@ import time
 
 import modal
 
-DEFAULT_MODEL = "qwen3.6:27b"
+DEFAULT_MODEL = "gemma4:12b"
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -97,6 +97,7 @@ class OllamaService:
         wait_for_ollama()
         subprocess.run(["echo", "pulling model", model_name])
         subprocess.run(["ollama", "pull", model_name], check=True)
+        volume.commit()
 
     @modal.method()
     def list(self):
