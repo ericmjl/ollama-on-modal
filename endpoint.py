@@ -70,7 +70,7 @@ def warmup_model(model_name: str = DEFAULT_MODEL, timeout: float = 600.0) -> Non
 
 @app.cls(
     volumes={"/usr/share/ollama/.ollama/models": volume},
-    gpu="L40S",
+    gpu="A10G",
     scaledown_window=120,
     timeout=3600,
 )
